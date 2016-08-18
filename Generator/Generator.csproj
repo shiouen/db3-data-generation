@@ -48,7 +48,16 @@
     <Compile Include="Model\Club.cs" />
     <Compile Include="Model\ClubHouse.cs" />
     <Compile Include="Model\ContestWeek.cs" />
+    <Compile Include="Model\Department.cs" />
+    <Compile Include="Model\Game.cs" />
+    <Compile Include="Model\Player.cs" />
+    <Compile Include="Model\Ranking.cs" />
     <Compile Include="Model\Season.cs" />
+    <Compile Include="Model\Selection.cs" />
+    <Compile Include="Model\Set.cs" />
+    <Compile Include="Model\Team.cs" />
+    <Compile Include="Model\TeamPlayer.cs" />
+    <Compile Include="Model\Winner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

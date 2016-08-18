@@ -19,8 +19,14 @@ namespace Generator.Model {
         }
 
         public override string ToString() {
-            string s = "({0}, '{1}', '{2}', {3}, {4})";
-            return String.Format(s, this.Id, this.End.ToString("yyyy-MM-dd"), this.Start.ToString("yyyy-MM-dd"), this.WeekNumber, this.SeasonId);
+            return String.Format(
+                "({0}, '{1}', '{2}', {3}, {4})",
+                this.Id,
+                this.End.ToString("yyyy-MM-dd"),
+                this.Start.ToString("yyyy-MM-dd"),
+                this.WeekNumber,
+                this.SeasonId
+            );
         }
     }
 }

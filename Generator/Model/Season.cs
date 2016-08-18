@@ -17,8 +17,12 @@ namespace Generator.Model {
         }
 
         public override string ToString() {
-            string s = "({0}, '{1}', '{2}')";
-            return String.Format(s, this.Id, this.End.ToString("yyyy-MM-dd"), this.Start.ToString("yyyy-MM-dd"));
+            return String.Format(
+                "({0}, '{1}', '{2}')",
+                this.Id,
+                this.End.ToString("yyyy-MM-dd"),
+                this.Start.ToString("yyyy-MM-dd")
+            );
         }
     }
 }

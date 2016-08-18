@@ -29,8 +29,18 @@ namespace Generator.Model {
         }
 
         public override string ToString() {
-            string s = "({0}, {1}, {2:0.000000}, {3:0.000000}, '{4}', {5}, '{6}', '{7}', {8})";
-            return String.Format(s, this.Id, this.AmountOfTables, this.Latitude, this.Longitude, this.Name, this.PostalCode, this.Place, this.StreetName, this.StreetNumber);
+            return String.Format(
+                "({0}, {1}, {2:0.000000}, {3:0.000000}, '{4}', {5}, '{6}', '{7}', {8})",
+                this.Id,
+                this.AmountOfTables,
+                this.Latitude,
+                this.Longitude,
+                this.Name,
+                this.PostalCode,
+                this.Place,
+                this.StreetName,
+                this.StreetNumber
+            );
         }
     }
 }

@@ -12,22 +12,48 @@ namespace Generator {
         public string Path { get; set; }
         public Random Random { get; set; }
 
-        private List<String> places;
-        private List<int> postalCodes;
-        private List<String> streetNames;
+        public List<String> Places;
+        public List<int> PostalCodes;
+        public List<String> StreetNames;
 
         public List<Club> Clubs { get; set; }
         public List<ClubHouse> ClubHouses { get; set; }
+        public List<Contest> Contests { get; set; }
         public List<ContestWeek> ContestWeeks { get; set; }
+        public List<Game> Games { get; set; }
+        public List<Player> Players { get; set; }
         public List<Season> Seasons { get; set; }
+        public List<Selection> Selections { get; set; }
+        public List<Set> Sets { get; set; }
+        public List<TeamPlayer> TeamPlayers { get; set; }
+        public List<Team> Teams { get; set; }
 
         public Program() {
             this.Clubs = new List<Club>();
             this.ClubHouses = new List<ClubHouse>();
+            this.Contests = new List<Contest>();
             this.ContestWeeks = new List<ContestWeek>();
+            this.Games = new List<Game>();
+            this.Players = new List<Player>();
             this.Seasons = new List<Season>();
+            this.Selections = new List<Selection>();
+            this.TeamPlayers = new List<TeamPlayer>();
+            this.Teams = new List<Team>();
 
-            this.initPlaces();
+            this.Places = new List<String>(
+                new String[] {
+                    "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen",
+                    "Deurne", "Wijnegem", "Borgerhout", "Merksem", "Ekeren", "Berchem", "Wilrijk", "Hoboken", "Aartselaar"
+                });
+
+            this.PostalCodes = new List<int>(new int[] { 2000, 2018, 2020, 2030, 2040, 2050, 2060, 2100, 2110, 2140, 2170, 2180, 2600, 2610, 2660, 2630 });
+
+            this.StreetNames = new List<String>(
+                new String[] {
+                    "Arlington Avenue", "Jefferson Court", "Route 10", "Lafayette Street", "Hawthorne Lane", "Surrey Lane", "Laurel Street",
+                    "Beech Street", "Virginia Street", "Street Road", "North Avenue", "Monroe Street", "Magnolia Court", "Cambridge Court", "Hanover Court",
+                }
+            );
 
             this.Random = new Random();
         }
@@ -57,9 +83,9 @@ namespace Generator {
             for (int clubHouseId = 1; clubHouseId <= clubHouseAmount; ++clubHouseId) {
                 ClubHouse clubHouse = ClubHouse.Generate(
                     clubHouseId,
-                    this.postalCodes[clubHouseId - 1],
-                    this.places[clubHouseId - 1],
-                    this.streetNames[clubHouseId - 1],
+                    this.PostalCodes[clubHouseId - 1],
+                    this.Places[clubHouseId - 1],
+                    this.StreetNames[clubHouseId - 1],
                     this.Random
                 );
 
@@ -80,6 +106,10 @@ namespace Generator {
                 }
             }
 
+            return this;
+        }
+
+        private Program GenerateGames() {
             return this;
         }
 
@@ -109,7 +139,6 @@ namespace Generator {
             StringBuilder builder = new StringBuilder();
             this.Path = String.Format("{0}../../{1}", AppDomain.CurrentDomain.BaseDirectory, "Files/inserts.sql");
 
-
             this.ClubHouses.BuildAsQuery(builder, "club_houses");
             this.Clubs.BuildAsQuery(builder, "clubs");
 
@@ -119,25 +148,6 @@ namespace Generator {
             using (StreamWriter writer = new StreamWriter(this.Path)) {
                 writer.Write(builder.ToString());
             }
-        }
-
-        private Program initPlaces() {
-            this.places = new List<String>(
-                new String[] {
-                    "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen",
-                    "Deurne", "Wijnegem", "Borgerhout", "Merksem", "Ekeren", "Berchem", "Wilrijk", "Hoboken", "Aartselaar"
-                });
-
-            this.postalCodes = new List<int>(new int[] { 2000, 2018, 2020, 2030, 2040, 2050, 2060, 2100, 2110, 2140, 2170, 2180, 2600, 2610, 2660, 2630 });
-
-            this.streetNames = new List<String>(
-                new String[] {
-                    "Arlington Avenue", "Jefferson Court", "Route 10", "Lafayette Street", "Hawthorne Lane", "Surrey Lane", "Laurel Street",
-                    "Beech Street", "Virginia Street", "Street Road", "North Avenue", "Monroe Street", "Magnolia Court", "Cambridge Court", "Hanover Court",
-                }
-            );
-
-            return this;
         }
     }
 }

@@ -7,18 +7,23 @@ namespace Generator.Model {
         public int MembershipNumber { get; set; }
         public int ClubHouseId { get; set; }
 
-        public static Club Generate(int clubId, int clubHouseId) {
+        public static Club Generate(int index, int clubHouseId) {
             return new Club {
-                Id = clubId,
-                Name = String.Format("club{0}", clubId),
-                MembershipNumber = clubId,
+                Id = index,
+                Name = String.Format("club{0}", index),
+                MembershipNumber = index,
                 ClubHouseId = clubHouseId
             };
         }
 
         public override string ToString() {
-            string s = "({0}, '{1}', {2}, {3})";
-            return String.Format(s, this.Id, this.Name, this.MembershipNumber, this.ClubHouseId);
+            return String.Format(
+                "({0}, '{1}', {2}, {3})",
+                this.Id,
+                this.Name,
+                this.MembershipNumber,
+                this.ClubHouseId
+            );
         }
     }
 }
