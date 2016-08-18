@@ -6,6 +6,7 @@ using System.Text;
 
 using Generator.Extensions;
 using Generator.Model;
+using System.Net.Http;
 
 namespace Generator {
     public class Program {
@@ -40,6 +41,7 @@ namespace Generator {
             this.TeamPlayers = new List<TeamPlayer>();
             this.Teams = new List<Team>();
 
+            // Places
             this.Places = new List<String>(
                 new String[] {
                     "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen", "Antwerpen",
@@ -55,19 +57,15 @@ namespace Generator {
                 }
             );
 
+            using (var client = new HttpClient()) {
+                Uri uri = new Uri("http://api.randomuser.me/?results=5000");
+
+                HttpResponseMessage result = client.GetAsync(uri).Result;
+                string resultContent = result.Content.ReadAsStringAsync().Result;
+                Console.WriteLine(resultContent);
+            }
+
             this.Random = new Random();
-        }
-
-        public static void Main(string[] args) {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            new Program()
-                .GenerateDatabase()
-                .WriteInserts(cleanUp: false);
-
-            stopwatch.Stop();
-            Console.WriteLine(stopwatch.ElapsedMilliseconds);
-            Console.Read();
         }
 
         private Program GenerateClubs(int clubAmount = 40) {
@@ -148,6 +146,18 @@ namespace Generator {
             using (StreamWriter writer = new StreamWriter(this.Path)) {
                 writer.Write(builder.ToString());
             }
+        }
+
+        public static void Main(string[] args) {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            new Program()
+                .GenerateDatabase()
+                .WriteInserts(cleanUp: false);
+
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            Console.Read();
         }
     }
 }
