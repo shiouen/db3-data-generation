@@ -6,15 +6,15 @@ namespace Generator.Model {
         public DateTime End { get; set; }
         public DateTime Start { get; set; }
         public int WeekNumber { get; set; }
-        public int SeasonId { get; set; }
+        public int DepartmentId { get; set; }
 
-        public static ContestWeek Generate(int index, int weekNumber, int seasonId, DateTime seasonStart) {
+        public static ContestWeek Generate(int index, int weekNumber, int departmentId, DateTime seasonStart) {
             return new ContestWeek {
                 Id = index,
                 End = seasonStart.AddDays((weekNumber * 7) - 1),
                 Start = seasonStart.AddDays((weekNumber - 1) * 7),
                 WeekNumber = weekNumber,
-                SeasonId = seasonId
+                DepartmentId = departmentId
             };
         }
 
@@ -25,7 +25,7 @@ namespace Generator.Model {
                 this.End.ToString("yyyy-MM-dd"),
                 this.Start.ToString("yyyy-MM-dd"),
                 this.WeekNumber,
-                this.SeasonId
+                this.DepartmentId
             );
         }
     }

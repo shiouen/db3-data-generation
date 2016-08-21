@@ -13,7 +13,7 @@ namespace Generator.Model {
         public string StreetName { get; set; }
         public int StreetNumber { get; set; }
 
-        public static Player Generate(int index, DateTime dateOfBirth, string firstName, string lastName, int postalCode, string place, string streetName, int streetNumber) {
+        public static Player Generate(int index, DateTime dateOfBirth, string firstName, string lastName, int postalCode, string place, Ranking ranking, string streetName, int streetNumber) {
             return new Player {
                 Id = index,
                 DateOfBirth = dateOfBirth,
@@ -22,6 +22,7 @@ namespace Generator.Model {
                 MembershipNumber = index,
                 PostalCode = postalCode,
                 Place = place,
+                Ranking = ranking,
                 StreetName = streetName,
                 StreetNumber = streetNumber
             };
@@ -29,15 +30,15 @@ namespace Generator.Model {
 
         public override string ToString() {
             return String.Format(
-                "({0}, '{1}', '{2}', '{3}', {4}, {5}, '{6}', '{7}', '{8}', {9})",
+                "({0}, '{1}', {2}, '{3}', '{4}', {5}, '{6}', '{7}', '{8}', {9})",
                 this.Id,
                 this.DateOfBirth.ToString("yyyy-MM-dd"),
+                this.MembershipNumber,
                 this.FirstName,
                 this.LastName,
-                this.MembershipNumber,
                 this.PostalCode,
-                this.Ranking.ToString(),
                 this.Place,
+                this.Ranking.ToString(),
                 this.StreetName,
                 this.StreetNumber
             );

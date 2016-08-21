@@ -6,7 +6,7 @@ namespace Generator.Model {
         public int PlayerId { get; set; }
         public int TeamId { get; set; }
 
-        public TeamPlayer Generate(int index, int playerId, int teamId) {
+        public static TeamPlayer Generate(int index, int playerId, int teamId) {
             return new TeamPlayer {
                 Id = index,
                 PlayerId = playerId,
