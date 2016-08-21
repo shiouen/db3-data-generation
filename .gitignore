@@ -252,4 +252,4 @@ paket-files/
 *.sln.iml
 
 # sql file
-Generator/Files/insers.sql
+Generator/Files/inserts.sql
