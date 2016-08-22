@@ -3,6 +3,8 @@
 namespace Generator.Model {
     public class Contest {
         public int Id { get; set; }
+        public int ContestNumber { get; set; }
+        public DateTime Date { get; set; }
         public int GuestScore { get; set; }
         public int HomeScore { get; set; }
         public bool Surrender { get; set; }
@@ -25,12 +27,14 @@ namespace Generator.Model {
 
     
         public static Contest Generate(
-           int index, int guestScore, int homeScore, bool surrender, int contestWeekId,
+           int index, int contestNumber, DateTime date, int guestScore, int homeScore, bool surrender, int contestWeekId,
            int guestTeamId, int guestCaptainTeamPlayerId, int guestFirstTeamPlayerId, int guestSecondTeamPlayerId, int guestThirdTeamPlayerId, int guestFourthTeamPlayerId,
            int homeTeamId, int homeCaptainTeamPlayerId, int homeFirstTeamPlayerId, int homeSecondTeamPlayerId, int homeThirdTeamPlayerId, int homeFourthTeamPlayerId,
            int refereeTeamPlayerId) {
             return new Contest {
                 Id = index,
+                ContestNumber = contestNumber,
+                Date = date,
                 GuestScore = guestScore,
                 HomeScore = homeScore,
                 Surrender = surrender,
@@ -53,8 +57,10 @@ namespace Generator.Model {
 
         public override string ToString() {
             return String.Format(
-                "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17})",
+                "({0}, {1}, '{2}', {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19})",
                 this.Id,
+                this.ContestNumber,
+                this.Date.ToString("yyyy-MM-dd"),
                 this.GuestScore,
                 this.HomeScore,
                 this.Surrender.ToString().ToUpper(),

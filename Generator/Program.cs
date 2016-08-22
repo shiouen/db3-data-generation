@@ -72,22 +72,33 @@ namespace Generator {
         }
 
         private Program CompleteContests() {
-            foreach (Contest contest in this.Contests) {
-                if (contest.Surrender) {
-                    // 1 / 2 chance each side to surrender
-                    bool homeSurrenders = (this.Random.Next() % 2 == 0) && contest.Surrender;
-                    bool guestSurrenders = contest.Surrender && !homeSurrenders;
+            foreach (ContestWeek contestWeek in this.ContestWeeks) {
+                List<Contest> contests = this.Contests
+                    .Where(contest => contest.ContestWeekId == contestWeek.Id).ToList()
+                    .OrderBy(contest => contest.Date)
+                    .ToList();
 
-                    contest.HomeScore = (guestSurrenders) ? 1 : 0;
-                    contest.GuestScore = (homeSurrenders) ? 1 : 0;
+                int contestNumber = 1;
 
-                    continue;
+                foreach (Contest contest in contests) {
+                    contest.ContestNumber = contestNumber++;
+
+                    if (contest.Surrender) {
+                        // 1 / 2 chance each side to surrender
+                        bool homeSurrenders = (this.Random.Next() % 2 == 0) && contest.Surrender;
+                        bool guestSurrenders = contest.Surrender && !homeSurrenders;
+
+                        contest.HomeScore = (guestSurrenders) ? 1 : 0;
+                        contest.GuestScore = (homeSurrenders) ? 1 : 0;
+
+                        continue;
+                    }
+
+                    List<Game> games = this.Games.Where(game => contest.Id == game.ContestId).ToList();
+
+                    contest.GuestScore = games.Where(game => game.GuestSetsWon > game.HomeSetsWon).Count();
+                    contest.HomeScore = games.Where(game => game.GuestSetsWon < game.HomeSetsWon).Count();
                 }
-
-                List<Game> games = this.Games.Where(game => contest.Id == game.ContestId).ToList();
-
-                contest.GuestScore = games.Where(game => game.GuestSetsWon > game.HomeSetsWon).Count();
-                contest.HomeScore = games.Where(game => game.GuestSetsWon < game.HomeSetsWon).Count();
             }
 
             return this;
@@ -118,7 +129,6 @@ namespace Generator {
                 refereeTeamPlayerId = 0;
 
             Team[] teams = null;
-            TeamPlayer[] homeTeamPlayers = null;
 
             TeamPlayer[] guestTeamPlayersByRank = null;
             TeamPlayer[] homeTeamPlayersByRank = null;
@@ -135,8 +145,6 @@ namespace Generator {
                 teams = this.Teams.Where(team => team.DepartmentId == department.Id).ToArray();
 
                 foreach (Team homeTeam in teams) {
-                    homeTeamPlayers = this.TeamPlayers.Where(teamPlayer => teamPlayer.TeamId == homeTeam.Id).ToArray();
-
                     foreach (Team guestTeam in teams) {
                         if (homeTeam.Id == guestTeam.Id) { continue; }
 
@@ -174,11 +182,14 @@ namespace Generator {
 
                         contestWeek = this.ContestWeeks.Where(cw => cw.DepartmentId == department.Id && cw.WeekNumber == contestWeekNumber).SingleOrDefault();
 
+                        int days = this.Random.Next(0, 7);
+                        DateTime date = contestWeek.Start.AddDays(days);
+
                         // 1 / 200 chance for surrender
                         bool surrender = (this.Random.Next() % 200 == 0);
 
                         contest = Contest.Generate(
-                            contestId++, 0, 0, surrender, contestWeek.Id,
+                            contestId++, 0, date, 0, 0, surrender, contestWeek.Id,
                             guestTeam.Id, guestCaptainTeamPlayerId, guestFirstTeamPlayerId, guestSecondTeamPlayerId, guestThirdTeamPlayerId, guestFourthTeamPlayerId,
                             homeTeam.Id, homeCaptainTeamPlayerId, homeFirstTeamPlayerId, homeSecondTeamPlayerId, homeThirdTeamPlayerId, homeFourthTeamPlayerId,
                             refereeTeamPlayerId
@@ -353,7 +364,7 @@ namespace Generator {
                     // 1/2 chance to win
                     bool homeWins = (this.Random.Next() % 2 == 0) ? true : false;
 
-                    int winningScore = this.Random.Next(11, 35);
+                    int winningScore = this.Random.Next(11, 50);
                     int losingScore = 0;
 
                     switch (winningScore) {
