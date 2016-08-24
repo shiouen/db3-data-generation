@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Generator.Model {
     public enum Ranking {
@@ -15,7 +16,7 @@ namespace Generator.Model {
 
         public RankingComparer() {
             // you can reorder it's all as you want
-            orderedTypes = new List<Ranking>() {
+            this.orderedTypes = new List<Ranking>() {
                 Ranking.NG,
                 Ranking.E6, Ranking.E4, Ranking.E2, Ranking.E0,
                 Ranking.D6, Ranking.D4, Ranking.D2, Ranking.D0,
@@ -26,10 +27,18 @@ namespace Generator.Model {
         }
 
         public int Compare(Ranking x, Ranking y) {
-            var xIndex = orderedTypes.IndexOf(x);
-            var yIndex = orderedTypes.IndexOf(y);
+            int xAsInt = this.RankingToInt(x);
+            var yAsInt = this.RankingToInt(y);
 
-            return xIndex.CompareTo(yIndex);
+            return xAsInt.CompareTo(yAsInt);
+        }
+
+        public int RankingToInt(Ranking ranking) {
+            return this.orderedTypes.IndexOf(ranking);
+        }
+
+        public int GetAmountOfRankings() {
+            return this.orderedTypes.Count;
         }
     };
 }

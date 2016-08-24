@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 
 using Generator.Extensions;
 using Generator.Model;
+using Generator.Utilities;
 
 namespace Generator {
     public class Program {
@@ -31,6 +32,13 @@ namespace Generator {
         public List<Set> Sets { get; set; }
         public List<TeamPlayer> TeamPlayers { get; set; }
         public List<Team> Teams { get; set; }
+
+        public Dictionary<int, Ranking> RankingByTeamPlayerId { get; set; }
+        public Dictionary<int, List<Contest>> ContestsByContestWeekId { get; set; }
+        public Dictionary<int, List<Game>> GamesByContestId { get; set; }
+        public Dictionary<int, List<TeamPlayer>> TeamPlayersByTeamId { get; set; }
+        public Dictionary<int, List<Team>> TeamsByDepartmentId { get; set; }
+        public Dictionary<int, int> AgeByTeamPlayerId { get; set; }
 
         public Program() {
             this.Clubs = new List<Club>();
@@ -64,17 +72,22 @@ namespace Generator {
             // Departments
             this.DepartmentNames = new List<String>(new String[] {
                 "F5", "E5", "D5", "C5", "B5", "A5", "D4", "C4", "B4", "A4", "C3", "B3", "A3", "B2", "A2", "A1"
-            }
+            });
 
-            );
+            // Dicitonaries
+            this.RankingByTeamPlayerId = new Dictionary<int, Ranking>();
+            this.ContestsByContestWeekId = new Dictionary<int, List<Contest>>();
+            this.GamesByContestId = new Dictionary<int, List<Game>>();
+            this.TeamPlayersByTeamId = new Dictionary<int, List<TeamPlayer>>();
+            this.TeamsByDepartmentId = new Dictionary<int, List<Team>>();
+            this.AgeByTeamPlayerId= new Dictionary<int, int>();
 
             this.Random = new Random();
         }
 
         private Program CompleteContests() {
             foreach (ContestWeek contestWeek in this.ContestWeeks) {
-                List<Contest> contests = this.Contests
-                    .Where(contest => contest.ContestWeekId == contestWeek.Id).ToList()
+                List<Contest> contests = this.ContestsByContestWeekId[contestWeek.Id]
                     .OrderBy(contest => contest.Date)
                     .ToList();
 
@@ -94,10 +107,10 @@ namespace Generator {
                         continue;
                     }
 
-                    List<Game> games = this.Games.Where(game => contest.Id == game.ContestId).ToList();
+                    List<Game> games = this.GamesByContestId[contest.Id];
 
-                    contest.GuestScore = games.Where(game => game.GuestSetsWon > game.HomeSetsWon).Count();
-                    contest.HomeScore = games.Where(game => game.GuestSetsWon < game.HomeSetsWon).Count();
+                    contest.GuestScore = games.FindAll(game => game.GuestSetsWon > game.HomeSetsWon).Count();
+                    contest.HomeScore = games.FindAll(game => game.GuestSetsWon < game.HomeSetsWon).Count();
                 }
             }
 
@@ -128,10 +141,10 @@ namespace Generator {
                 homeFourthTeamPlayerId,
                 refereeTeamPlayerId = 0;
 
-            Team[] teams = null;
+            List<Team> departmentTeams = null;
 
-            TeamPlayer[] guestTeamPlayersByRank = null;
-            TeamPlayer[] homeTeamPlayersByRank = null;
+            List<TeamPlayer> guestTeamPlayersByRank = new List<TeamPlayer>();
+            List<TeamPlayer> homeTeamPlayersByRank = new List<TeamPlayer>();
 
             ContestWeek contestWeek = null;
             int contestWeekNumber = 1;
@@ -142,45 +155,43 @@ namespace Generator {
             Dictionary<int, HashSet<int>> teamAgendas = new Dictionary<int, HashSet<int>>();
 
             foreach (Department department in this.Departments) {
-                teams = this.Teams.Where(team => team.DepartmentId == department.Id).ToArray();
+                departmentTeams = this.TeamsByDepartmentId[department.Id];
 
-                foreach (Team homeTeam in teams) {
-                    foreach (Team guestTeam in teams) {
+                foreach (Team homeTeam in departmentTeams) {
+                    foreach (Team guestTeam in departmentTeams) {
                         if (homeTeam.Id == guestTeam.Id) { continue; }
 
                         if (!teamAgendas.ContainsKey(guestTeam.Id)) { teamAgendas[guestTeam.Id] = new HashSet<int>(); }
                         if (!teamAgendas.ContainsKey(homeTeam.Id)) { teamAgendas[homeTeam.Id] = new HashSet<int>(); }
 
-                        guestTeamPlayersByRank = this.TeamPlayers
-                            .Where(teamPlayer => teamPlayer.TeamId == guestTeam.Id)
-                            .OrderBy(teamPlayer => this.Players.Where(player => player.Id == teamPlayer.PlayerId).SingleOrDefault().Ranking, rankingComparer)
-                            .ToArray();
+                        guestTeamPlayersByRank = this.TeamPlayersByTeamId[guestTeam.Id]
+                            .OrderByDescending(teamPlayer => this.RankingByTeamPlayerId[teamPlayer.Id], rankingComparer)
+                            .ToList();
 
-                        homeTeamPlayersByRank = this.TeamPlayers
-                            .Where(teamPlayer => teamPlayer.TeamId == homeTeam.Id)
-                            .OrderBy(teamPlayer => this.Players.Where(player => player.Id == teamPlayer.PlayerId).SingleOrDefault().Ranking, rankingComparer)
-                            .ToArray();
+                        homeTeamPlayersByRank = this.TeamPlayersByTeamId[homeTeam.Id]
+                            .OrderBy(teamPlayer => this.RankingByTeamPlayerId[teamPlayer.Id], rankingComparer)
+                            .ToList();
 
-                        guestCaptainTeamPlayerId = guestTeamPlayersByRank[0].Id;
-                        guestFirstTeamPlayerId = guestTeamPlayersByRank[0].Id;
-                        guestSecondTeamPlayerId = guestTeamPlayersByRank[1].Id;
-                        guestThirdTeamPlayerId = guestTeamPlayersByRank[2].Id;
-                        guestFourthTeamPlayerId = guestTeamPlayersByRank[3].Id;
+                        guestCaptainTeamPlayerId = guestTeamPlayersByRank[this.Random.Next(0, 2)].Id;
+                        guestFirstTeamPlayerId = guestCaptainTeamPlayerId;
+                        guestSecondTeamPlayerId = guestTeamPlayersByRank[this.Random.Next(2, 5)].Id;
+                        guestThirdTeamPlayerId = guestTeamPlayersByRank[this.Random.Next(5, 8)].Id;
+                        guestFourthTeamPlayerId = guestTeamPlayersByRank[this.Random.Next(8, 9)].Id;
 
-                        homeCaptainTeamPlayerId = homeTeamPlayersByRank[0].Id;
-                        homeFirstTeamPlayerId = homeTeamPlayersByRank[0].Id;
-                        homeSecondTeamPlayerId = homeTeamPlayersByRank[1].Id;
-                        homeThirdTeamPlayerId = homeTeamPlayersByRank[2].Id;
-                        homeFourthTeamPlayerId = homeTeamPlayersByRank[3].Id;
+                        homeCaptainTeamPlayerId = homeTeamPlayersByRank[this.Random.Next(0, 2)].Id;
+                        homeFirstTeamPlayerId = homeCaptainTeamPlayerId;
+                        homeSecondTeamPlayerId = homeTeamPlayersByRank[this.Random.Next(2, 5)].Id;
+                        homeThirdTeamPlayerId = homeTeamPlayersByRank[this.Random.Next(5, 8)].Id;
+                        homeFourthTeamPlayerId = homeTeamPlayersByRank[this.Random.Next(8, 10)].Id;
 
-                        refereeTeamPlayerId = guestTeamPlayersByRank[4].Id;
+                        refereeTeamPlayerId = guestTeamPlayersByRank[9].Id;
 
                         contestWeekNumber = (from n in Enumerable.Range(int.MinValue, int.MaxValue)
                                              let number = this.Random.Next(1, 23)
                                              where !teamAgendas[guestTeam.Id].Contains(number) || !teamAgendas[homeTeam.Id].Contains(number)
                                              select number).First();
 
-                        contestWeek = this.ContestWeeks.Where(cw => cw.DepartmentId == department.Id && cw.WeekNumber == contestWeekNumber).SingleOrDefault();
+                        contestWeek = this.ContestWeeks.Find(cw => cw.DepartmentId == department.Id && cw.WeekNumber == contestWeekNumber);
 
                         int days = this.Random.Next(0, 7);
                         DateTime date = contestWeek.Start.AddDays(days);
@@ -197,6 +208,8 @@ namespace Generator {
 
                         teamAgendas[guestTeam.Id].Add(contestWeekNumber);
                         teamAgendas[homeTeam.Id].Add(contestWeekNumber);
+
+                        this.ContestsByContestWeekId[contestWeek.Id].Add(contest);
 
                         this.Contests.Add(contest);
                     }
@@ -226,10 +239,13 @@ namespace Generator {
             int contestWeekId = 1;
 
             foreach (Department department in this.Departments) {
-                DateTime seasonStart = this.Seasons.Where(season => season.Id == department.SeasonId).FirstOrDefault().Start;
+                DateTime seasonStart = this.Seasons.Find(season => season.Id == department.SeasonId).Start;
 
                 for (int contestWeekNumber = 1; contestWeekNumber <= amountPerDepartmentPerSeason; ++contestWeekNumber) {
                     ContestWeek contestWeek = ContestWeek.Generate(contestWeekId++, contestWeekNumber, department.Id, seasonStart);
+
+                    this.ContestsByContestWeekId[contestWeek.Id] = new List<Contest>();
+
                     this.ContestWeeks.Add(contestWeek);
                 }
             }
@@ -260,54 +276,87 @@ namespace Generator {
 
                 if (contest.Surrender) { continue; }
 
+                this.GamesByContestId[contest.Id] = new List<Game>();
+
                 //  4-2
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFourthTeamPlayerId, contest.GuestSecondTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  3-1
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeThirdTeamPlayerId, contest.GuestFirstTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  2-4
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeSecondTeamPlayerId, contest.GuestFourthTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  1-3
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFirstTeamPlayerId, contest.GuestThirdTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  4-1
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFourthTeamPlayerId, contest.GuestFirstTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  3-2
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeThirdTeamPlayerId, contest.GuestSecondTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  2-3
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeSecondTeamPlayerId, contest.GuestThirdTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  1-4
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFirstTeamPlayerId, contest.GuestFourthTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  4-3
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFourthTeamPlayerId, contest.GuestThirdTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  3-4
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeThirdTeamPlayerId, contest.GuestFourthTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  2-1
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeSecondTeamPlayerId, contest.GuestFirstTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  1-2
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFirstTeamPlayerId, contest.GuestSecondTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  4-4
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFourthTeamPlayerId, contest.GuestFourthTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  3-3
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeThirdTeamPlayerId, contest.GuestThirdTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  2-2
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeSecondTeamPlayerId, contest.GuestSecondTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
+
                 //  1-1
                 game = Game.Generate(gameId++, gameNumber++, 0, 0, contest.Id, contest.HomeFirstTeamPlayerId, contest.GuestFirstTeamPlayerId);
                 this.Games.Add(game);
+                this.GamesByContestId[contest.Id].Add(game);
             }
 
             return this;
@@ -357,12 +406,19 @@ namespace Generator {
         private Program GenerateSets() {
             int setId = 1;
 
+            SetUtilities setUtils = new SetUtilities();
+
             foreach (Game game in this.Games) {
                 int setNumber = 1;
 
+                Ranking guestRanking = this.RankingByTeamPlayerId[game.GuestTeamPlayerId];
+                Ranking homeRanking = this.RankingByTeamPlayerId[game.HomeTeamPlayerId];
+
                 while (game.HomeSetsWon != 3 && game.GuestSetsWon != 3) {
-                    // 1/2 chance to win
-                    bool homeWins = (this.Random.Next() % 2 == 0) ? true : false;
+                    bool homeWins = setUtils.DetermineSetByRankAndAge(
+                        homeRanking, this.AgeByTeamPlayerId[game.HomeTeamPlayerId],
+                        guestRanking, this.AgeByTeamPlayerId[game.GuestTeamPlayerId],
+                        this.Random);
 
                     int winningScore = this.Random.Next(11, 50);
                     int losingScore = 0;
@@ -393,9 +449,14 @@ namespace Generator {
             int teamId = 1;
 
             foreach (Department department in this.Departments) {
+                this.TeamsByDepartmentId[department.Id] = new List<Team>();
+
                 for (int i = 0; i < amountPerDepartment; ++i) {
                     int clubId = this.Clubs[this.Random.Next(0, this.Clubs.Count)].Id;
                     Team team = Team.Generate(teamId++, clubId, department.Id);
+
+                    this.TeamsByDepartmentId[department.Id].Add(team);
+
                     this.Teams.Add(team);
                 }
             }
@@ -407,18 +468,25 @@ namespace Generator {
             int teamPlayerId = 1;
 
             foreach (Team team in this.Teams) {
-                List<int> playerIndexes = new List<int>();
-                 
-                while (playerIndexes.Count < amountPerTeam) {
-                    int playerIndex = this.Players[this.Random.Next(0, this.Players.Count)].Id;
-                    
-                    if (!playerIndexes.Contains(playerIndex)) {
-                        playerIndexes.Add(playerIndex);
+                List<Player> players = new List<Player>();
+
+                this.TeamPlayersByTeamId[team.Id] = new List<TeamPlayer>();
+
+                while (players.Count < amountPerTeam) {
+                    Player player = this.Players[this.Random.Next(0, this.Players.Count)];
+
+                    if (!players.Contains(player)) {
+                        players.Add(player);
                     }
                 }
 
-                foreach (int playerIndex in playerIndexes) {
-                    TeamPlayer teamPlayer = TeamPlayer.Generate(teamPlayerId++, playerIndex, team.Id);
+                foreach (Player player in players) {
+                    TeamPlayer teamPlayer = TeamPlayer.Generate(teamPlayerId++, player.Id, team.Id);
+
+                    this.RankingByTeamPlayerId[teamPlayer.Id] = player.Ranking;
+                    this.TeamPlayersByTeamId[team.Id].Add(teamPlayer);
+                    this.AgeByTeamPlayerId[teamPlayer.Id] = DateTime.Now.Year - player.DateOfBirth.Year;
+
                     this.TeamPlayers.Add(teamPlayer);
                 }
             }
