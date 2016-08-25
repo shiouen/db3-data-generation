@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace Generator.Extensions {
+namespace MySQL.Extensions {
     public static class ListExtensions {
         public static void BuildAsQuery<T>(this ICollection<T> collection, StringBuilder builder, string tableName) {
             if (collection.Count == 0) { return; }

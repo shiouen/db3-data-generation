@@ -7,11 +7,11 @@ using System.Text;
 
 using Newtonsoft.Json;
 
-using Generator.Extensions;
-using Generator.Model;
-using Generator.Utilities;
+using MySQL.Extensions;
+using MySQL.Model;
+using MySQL.Utilities;
 
-namespace Generator {
+namespace MySQL {
     public class Program {
         public string Path { get; set; }
         public Random Random { get; set; }
@@ -533,6 +533,7 @@ namespace Generator {
 
             using (StreamWriter writer = new StreamWriter(this.Path)) {
                 writer.Write(builder.ToString());
+                writer.Flush();
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using Generator.Model;
+using MySQL.Model;
 
-namespace Generator.Utilities {
+namespace MySQL.Utilities {
     public class SetUtilities {
         public RankingComparer RankingComparer { get; set; }
 

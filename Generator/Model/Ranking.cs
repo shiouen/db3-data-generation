@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Generator.Model {
+namespace MySQL.Model {
     public enum Ranking {
         NG,
         E6, E4, E2, E0,
@@ -12,11 +12,11 @@ namespace Generator.Model {
     }
 
     public class RankingComparer : IComparer<Ranking> {
-        protected IList<Ranking> orderedTypes { get; set; }
+        protected IList<Ranking> OrderedTypes { get; set; }
 
         public RankingComparer() {
             // you can reorder it's all as you want
-            this.orderedTypes = new List<Ranking>() {
+            this.OrderedTypes = new List<Ranking>() {
                 Ranking.NG,
                 Ranking.E6, Ranking.E4, Ranking.E2, Ranking.E0,
                 Ranking.D6, Ranking.D4, Ranking.D2, Ranking.D0,
@@ -34,11 +34,11 @@ namespace Generator.Model {
         }
 
         public int RankingToInt(Ranking ranking) {
-            return this.orderedTypes.IndexOf(ranking);
+            return this.OrderedTypes.IndexOf(ranking);
         }
 
         public int GetAmountOfRankings() {
-            return this.orderedTypes.Count;
+            return this.OrderedTypes.Count;
         }
     };
 }

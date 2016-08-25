@@ -253,3 +253,4 @@ paket-files/
 
 # sql file
 Generator/Files/inserts.sql
+Generator-NoSQL/Files/measurements.sql

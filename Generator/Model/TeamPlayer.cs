@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Generator.Model {
+namespace MySQL.Model {
     public class TeamPlayer {
         public int Id { get; set; }
         public int PlayerId { get; set; }

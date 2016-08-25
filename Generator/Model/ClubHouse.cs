@@ -1,8 +1,8 @@
 ﻿using System;
 
-using Generator.Extensions;
+using MySQL.Extensions;
 
-namespace Generator.Model {
+namespace MySQL.Model {
     public class ClubHouse {
         public int Id { get; set; }
         public int AmountOfTables { get; set; }
@@ -18,8 +18,8 @@ namespace Generator.Model {
             return new ClubHouse {
                 Id = index,
                 AmountOfTables = 120,
-                Latitude = random.nextLatitude(),
-                Longitude = random.nextLongitude(),
+                Latitude = random.NextLatitude(),
+                Longitude = random.NextLongitude(),
                 Name = String.Format("club_house{0}", index),
                 PostalCode = postalCode,
                 Place = place,
